@@ -1,11 +1,12 @@
-import logging
+
 import json
 from urllib.request import urlopen
 
 from utils import CITIES, ERR_MESSAGE_TEMPLATE
+from threading import current_thread
+from logger import logger
 
-logger = logging.getLogger()
-
+logger.name = 'api_client'
 
 class YandexWeatherAPI:
     """
@@ -42,5 +43,6 @@ class YandexWeatherAPI:
         :param city_name: key as str
         :return: response data as json
         """
+        logger.info(f'Thread: {current_thread().name} Sending request to {city_name}')
         city_url = self._get_url_by_city_name(city_name)
         return self._do_req(city_url)
