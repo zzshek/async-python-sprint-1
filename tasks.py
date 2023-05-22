@@ -4,7 +4,6 @@ from multiprocessing import Pool
 from datetime import datetime
 
 import pandas as pd
-
 from utils import CITIES
 from api_client import YandexWeatherAPI
 from logger import logger
@@ -13,12 +12,10 @@ logger.name = 'tasks'
 
 
 class DataFetchingTask:
-    THREADS = 10
-
     @staticmethod
     def get_response(function: Callable, items: Iterable) -> List[dict]:
         logger.info('Start sending requests')
-        with ThreadPoolExecutor(max_workers=DataFetchingTask.THREADS) as pool:
+        with ThreadPoolExecutor() as pool:
             result = pool.map(function, items)
             return [response for response in result]
 
@@ -62,8 +59,8 @@ class DataCalculationTask:
 
 class DataAggregationTask:
 
-    def __init__(self, cities_weather_measurments: List[dict]) -> None:
-        self.df = pd.DataFrame(cities_weather_measurments)
+    def __init__(self, cities_weather_measurements: List[dict]) -> None:
+        self.df = pd.DataFrame(cities_weather_measurements)
 
     def _set_date_format(self) -> None:
         self.df['day_date'] = pd.to_datetime(self.df['hour_ts'], format='%Y-%m-%d %H:%M:%S').dt.strftime('%Y-%m-%d')
@@ -149,8 +146,6 @@ if __name__ == '__main__':
     # 2. Вычислите среднюю температуру и проанализируйте информацию об осадках за указанный период для всех городов.
     parsed_response = DataCalculationTask().pool_process_calculation(cities_weather_response)
     parsed_response = [row for nested in parsed_response for row in nested]
-    # --? Как обернуть DataCalculationTask._parse_response в генератор, чтобы возвращал по словарю, а не лист словарей?
-    # --? pool_process_calculation не нашел как работать с генератором через него.
 
     # 3. Объедините полученные данные и сохраните результат в текстовом файле.
     agg_task = DataAggregationTask(parsed_response)
@@ -161,4 +156,4 @@ if __name__ == '__main__':
     analyzed_task = DataAnalyzingTask(df_aggregated)
     df_analyzed = analyzed_task.get_analyzed_weather_data()
 
-    # На тесты времени не осталось, сделаю со следующими комментариями
+    # Не писал ранее тесты, если есть базовые примеры как нужно тестить, хотел бы посмотреть в примере.

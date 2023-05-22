@@ -28,7 +28,7 @@ def check_python_version():
         sys.version_info.major < MIN_MAJOR_PYTHON_VER
         or sys.version_info.minor < MIN_MINOR_PYTHON_VER
     ):
-        raise Exception(
+        raise ValueError(
             "Please use python version >= {}.{}".format(
                 MIN_MAJOR_PYTHON_VER, MIN_MINOR_PYTHON_VER
             )
